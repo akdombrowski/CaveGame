@@ -1,8 +1,8 @@
 /*
  * Filename: Cave.java
- * Date: May 29, 2016
+ * Date: June 12, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 1 Cave class. 
+ * Purpose: Project 2 Cave class. 
  */
 
 import java.util.ArrayList;
@@ -16,18 +16,6 @@ public class Cave {
 	protected ArrayList<Creature> unalignedC = new ArrayList<Creature>();
 	protected ArrayList<Treasure> unheldT = new ArrayList<Treasure>();
 	protected ArrayList<Artifact> unheldA = new ArrayList<Artifact>();
-	
-	// maps for quicker searching
-	// creature map with index key
-	protected HashMap<Integer, Creature> cMap = 
-			new HashMap<Integer, Creature>();
-	// all elements with index, name, and type keys
-	protected HashMap<Integer, CaveElement> elByIndex = 
-			new HashMap<Integer, CaveElement>();
-	protected HashMap<String, CaveElement> elByName = 
-			new HashMap<String, CaveElement>();
-	protected HashMap<String, ArrayList<CaveElement>> elByType = 
-			new HashMap<String, ArrayList<CaveElement>>();
 
 	// scanner constructor
 	public Cave(Scanner sc) {
@@ -88,8 +76,7 @@ public class Cave {
 
 		// add parties to parties list and maps
 		parties.add(prty);
-		elByIndex.put(prty.index, prty);
-		elByName.put(prty.name, prty);
+		el.put(prty.index, prty);
 	} // end method addParty
 
 	// add creatures
@@ -114,18 +101,8 @@ public class Cave {
 			unalignedC.add(c);
 		} // end if isn't aligned
 		
-		// add to maps
-		cMap.put(c.index, c);
-		elByIndex.put(c.index, c);
-		elByName.put(c.name, c);
-		// add to type map
-		if(!elByType.containsKey(c.type)) {
-			ArrayList<CaveElement> al = new ArrayList<CaveElement>();
-			al.add(c);
-			elByType.put(c.type, al);
-		} else {
-			elByType.get(c.type).add(c); 
-		} // end if, else; check if key already in map
+		// add creature to elements map
+		el.put(c.index, c);
 	} // end method addToParty
 
 	// add treasures
@@ -134,27 +111,20 @@ public class Cave {
 		Treasure t = new Treasure(sc);
 		
 		// search for owner
-		Creature c = cMap.get(t.ownerIndex);
+		CaveElement e = el.get(t.ownerIndex);
+		Creature c;
 		
 		// if c isn't null add owner and treasure
-		if(c != null) {
+		if(e != null && e instanceof Creature) {
+			c = (Creature) e;
 			t.owner = c;
 			c.addTreasure(t);
 		} else {
 			unheldT.add(t);
 		} // end if, else on c being null
 		
-		// add to maps
-		elByIndex.put(t.index, t);
-		elByName.put(t.name, t);
-		// add to type map, create new list if necessary
-		if(!elByType.containsKey(t.type)) {
-			ArrayList<CaveElement> al = new ArrayList<CaveElement>();
-			al.add(t);
-			elByType.put(t.type, al);
-		} else {
-			elByType.get(t.type).add(t); 
-		} // end if type is in map
+		// add treasure to elements map
+		el.put(t.index, t);
 	} // end method addTreasure
 
 	// add artifacts using scanner
@@ -162,29 +132,173 @@ public class Cave {
 		// new artifact
 		Artifact a = new Artifact(sc);
 
-		// search for creature's party
-		Creature c = cMap.get(a.ownerIndex);
+		// search for owner
+		CaveElement e = el.get(a.ownerIndex);
+		Creature c;
 		
-		// check if creature belongs to a party
-		if(c != null) {
+		// check for owner
+		if(e != null && e instanceof Creature) {
+			c = (Creature) e;
 			a.owner = c;
 			c.addArtifact(a);
 		} else {
 			unheldA.add(a);
 		} // end if else
 		
-		// add to maps
-		elByIndex.put(a.index, a);
-		elByName.put(a.name, a);
-		// if type already exists add to list, if not create new list
-		if(!elByType.containsKey(a.type)) {
-			ArrayList<CaveElement> al = new ArrayList<CaveElement>();
-			al.add(a);
-			elByType.put(a.type, al);
-		} else {
-			elByType.get(a.type).add(a); 
-		} // end if type is in map
+		// add artifact to elements map
+		el.put(a.index, a);
 	} // end method addArtifact
+	
+	// search through parties by index, if doesn't match a party, 
+	// call each party's search method
+	public ArrayList<CaveElement> searchByIndex(int index) {
+		// search parties first
+		ArrayList<CaveElement> ceList = findByIndex(index);
+		
+		// check if list is empty
+		if(ceList.isEmpty()) {
+			for(Party p : parties) {
+				ceList = p.searchByIndex(index);
+				if(!ceList.isEmpty()) {
+					return ceList;
+				} // end if ceList isn't empty
+			} // end for each party
+		} // end if else ceList isn't empty from findByIndex
+		
+		// if above search hasn't returned a match check unassigned elements
+		// unassigned creatures
+		for(CaveElement ce : unalignedC) {
+			if(ce.index == index) {
+				ceList.add(ce);
+			} // end if index matches
+		} // end for each element in unalignedC
+		// unassigned treasures
+		for(CaveElement ce : unheldT) {
+			if(ce.index == index) {
+				ceList.add(ce);
+			} // end if index matches
+		} // end for each element in unheldT
+		// unassigned artifacts
+		for(CaveElement ce : unheldA) {
+			if(ce.index == index) {
+				ceList.add(ce);
+			} // end if index matches
+		} // end for each element in unheldA
+		
+		// return ceList, might be empty 
+		return ceList;
+	} // end search method
+	
+	// searches for a name
+	public ArrayList<CaveElement> searchByName(String name) {
+		// search parties first
+		ArrayList<CaveElement> ceList = findByName(name);
+	
+		// check if list is empty
+		if(ceList.isEmpty()) {
+			for(Party p : parties) {
+				ceList = p.searchByName(name);
+				if(!ceList.isEmpty()) {
+					return ceList;
+				} // end if ceList isn't empty
+			} // end for each party
+		} // end if else ceList isn't empty from findByIndex
+		
+		// if above search hasn't returned a match check unassigned elements
+		// unassigned creatures
+		for(CaveElement ce : unalignedC) {
+			if(ce.name == name) {
+				ceList.add(ce);
+			} // end if name matches
+		} // end for each element in unalignedC
+		// unassigned treasures
+		for(CaveElement ce : unheldT) {
+			if(ce.name == name) {
+				ceList.add(ce);
+			} // end if name matches
+		} // end for each element in unheldT
+		// unassigned artifacts
+		for(CaveElement ce : unheldA) {
+			if(ce.name == name) {
+				ceList.add(ce);
+			} // end if name matches
+		} // end for each element in unheldA
+		
+		return ceList;
+	} // end searchByName method
+
+	// searches for a type
+	public ArrayList<CaveElement> searchByType(String type) {
+		ArrayList<CaveElement> ceList = new ArrayList<CaveElement>();
+		
+		// search within each party for the type
+		for(Party p : parties) {
+			// search each party for the type
+			ArrayList<CaveElement> list = p.searchByType(type);
+			
+			// if the list isn't empty add items
+			if(!list.isEmpty()) {
+				// add each of the items in list to ceList
+				for(CaveElement ce : list) {
+					ceList.add(ce);
+				} // end for each cave element in list
+			} // end if
+		} // search for type
+		
+		// if above search hasn't returned a match check unassigned elements
+		// unassigned creatures
+		for(Creature c : unalignedC) {
+			if(c.type == type) {
+				ceList.add(c);
+			} // end if type matches
+		} // end for each element in unalignedC
+		// unassigned treasures
+		for(Treasure t : unheldT) {
+			if(t.type == type) {
+				ceList.add(t);
+			} // end if type matches
+		} // end for each element in unheldT
+		// unassigned artifacts
+		for(Artifact a : unheldA) {
+			if(a.type == type) {
+				ceList.add(a);
+			} // end if type matches
+		} // end for each element in unheldA
+		
+		return ceList;
+	} // end searchByType method
+
+	// searches for a creature by its index
+	public ArrayList<CaveElement> findByIndex(int index) {
+		// list for results
+		ArrayList<CaveElement> results = new ArrayList<CaveElement>();
+
+		// search each of the parties in this party
+		for(Party p : parties) {
+			if(p.index == index) {
+				results.add(p);
+			} // end if index equals index
+		} // end for each creature
+
+		// return results list
+		return results;
+	} // end findByIndex method
+
+	// searches for a creature by name
+	public ArrayList<CaveElement> findByName(String name) {
+		// results list
+		ArrayList<CaveElement> results = new ArrayList<CaveElement>();
+
+		// search each creature in this party
+		for(Party p : parties) {
+			if(p.name.equalsIgnoreCase(name)) {
+				results.add(p);
+			} // end if index equals index
+		} // end for each creature
+
+		// return results list
+		return results;
+	} // end findByName method
 
 	// creates string of cave data
 	public String toString() {

@@ -1,13 +1,13 @@
 /*
  * Filename: Treasure.java
- * Date: May 29, 2016
+ * Date: June 12, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 1 Treasures class. 
+ * Purpose: Project 2 Treasures class. 
  */
 
 import java.util.Scanner;
 
-public class Treasure extends CaveElement {
+public class Treasure extends CaveElement implements Comparable<Treasure> {
 	// inherits index, name
 	protected Creature owner;
 	protected int ownerIndex;
@@ -15,6 +15,14 @@ public class Treasure extends CaveElement {
 	protected double weight;
 	protected double value;
 
+	// sorting category variable, default to weight
+	protected static SORTBY sortBy = SORTBY.WEIGHT;
+
+	// enum for sorting categories
+	public enum SORTBY {
+		WEIGHT, VALUE;
+	} // end SORTBY enum
+	
 	// scanner constructor
 	public Treasure(Scanner sc) {
 		makeTreasure(sc);
@@ -32,6 +40,7 @@ public class Treasure extends CaveElement {
 	    value = sc.nextDouble();
 	} // end makeTreasure method
 	
+	// returns information as a string
 	public String toString() {
 		// return 0 for the owner if null
 		if (owner == null) {
@@ -43,4 +52,23 @@ public class Treasure extends CaveElement {
 		return String.format("%27d : %12s : %6d : %7.1f : %7.1f", 
 				index, type, owner.index, weight, value);
 	} // end toString method
+	
+	// compares this treasure to the treasure parameter based on sortBy
+	@Override
+	public int compareTo(Treasure t) {
+		// return 0 if t is null
+		if(t == null) {
+			return 0;
+		} // end if
+		
+		// switch on sortBy
+		switch(sortBy) {
+			case WEIGHT: 
+				return (int) Math.ceil(weight - t.weight);
+			case VALUE:
+				return (int) Math.ceil(value - t.value);
+			default:
+			 	return 0;
+		} // end switch
+	} // end compareTo method
 } // end Treasure class
