@@ -1,14 +1,14 @@
 /*
  * Filename: Creature.java
- * Date: May 29, 2016
+ * Date: June 12, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 1 Creature class. 
+ * Purpose: Project 2 Creature class. 
  */
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Creature extends CaveElement {
+public class Creature extends CaveElement implements Comparable<Creature> {
 	// inherits index, name
 	// lists for artifacts and treasures this creature has
 	protected ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
@@ -22,6 +22,18 @@ public class Creature extends CaveElement {
 	protected int fear;
 	protected String type;
 	protected double capacity;
+	// optional fields
+	protected double age;
+	protected double height;
+	protected double weight;
+	
+	// sorting category variable, default to name
+	protected static SORTBY sortBy = SORTBY.NAME;
+	
+	// enum for sorting categories
+	public enum SORTBY {
+		NAME, AGE, HEIGHT, WEIGHT, EMPATHY, FEAR, CAPACITY;
+	} // end SORTBY enum
 	
 	// scanner constructor
 	public Creature(Scanner sc) {
@@ -42,6 +54,13 @@ public class Creature extends CaveElement {
 	    fear = sc.nextInt();
 	    capacity = sc.nextDouble();
 	    
+	    // optional fields
+	    if(sc.hasNextDouble()) {
+	    	age = sc.nextDouble();
+		    height = sc.nextDouble();
+		    weight = sc.nextDouble();
+	    } // end if scanner has a double next
+	    
 	    // return the party index
 	    return partyIndex;
 	} // end makeCreature method
@@ -56,23 +75,38 @@ public class Creature extends CaveElement {
 		artifacts.add(a);
 	} // end addArtifact method
 	
+	// search by index, calls findByIndex method
+	public ArrayList<CaveElement> searchByIndex(int index) {
+		return findByIndex(index);
+	}
+	
+	// search by name, calls findByName method
+	public ArrayList<CaveElement> searchByName(String name) {
+		return findByName(name);
+	}
+	
+	// searches for type, calls findByType method
+	public ArrayList<CaveElement> searchByType(String type) {
+		return findByType(type);
+	}
+	
 	// search by index for a treasure or artifact
 	public ArrayList<CaveElement> findByIndex(int i) {
-		ArrayList<CaveElement> cList = new ArrayList<CaveElement>();
+		ArrayList<CaveElement> ceList = new ArrayList<CaveElement>();
 		
 		for(Treasure t : treasures) {
 			if(t.index == i) {
-				cList.add(t);
+				ceList.add(t);
 			} // end if index equals i
 		} // end for each treasure
 		
 		for(Artifact a : artifacts) {
 			if(a.index == i) {
-				cList.add(a);
+				ceList.add(a);
 			} // end if index match
 		} // end for each artifact
 		
-		return cList;
+		return ceList;
 	} // end findByIndex method
 	
 	// searches for a named treasure or artifact
@@ -150,4 +184,33 @@ public class Creature extends CaveElement {
 		// convert to string and return stringbuffer
 		return sb.toString();
 	} // end toString method
+	
+	// compares this creature to the creature parameter based on sortBy
+	@Override
+	public int compareTo(Creature c) {		
+		// if c is null, go no further and return 0
+		if(c == null) {
+			return 0;
+		} // end if
+		
+		// switch on sortBy
+		switch(sortBy) {
+			case NAME:
+				return name.compareTo(c.name);
+			case AGE:
+				return (int) Math.ceil(age - c.age);				
+			case HEIGHT:
+				return (int) Math.ceil(height - c.height);
+			case WEIGHT:
+				return (int) Math.ceil(weight - c.weight);
+			case EMPATHY:
+				return empathy - c.empathy;
+			case FEAR:
+				return fear - c.fear;
+			case CAPACITY:
+				return (int) Math.ceil(capacity - c.capacity);
+			default: 
+				return 0;
+		} // end switch
+	} // end compareTo method
 } // end Creature class

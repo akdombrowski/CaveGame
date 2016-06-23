@@ -1,9 +1,9 @@
 /*
  * Filename: CaveElement.java
- * Date: May 29, 2016
+ * Date: June 12, 2016
  * Author: Anthony Dombrowski
- * Purpose: Superclass for elements in the cave: creature, artifact, 
- * 	and treasure. Elements may not belong to any party.
+ * Purpose: Project 2 - Superclass for elements in the cave: creature, 
+ * artifact, and treasure. Elements may not belong to any party.
  */
 
 public class CaveElement {

@@ -1,22 +1,25 @@
 /*
  * Filename: GameGUI.java
- * Date: May 29, 2016
+ * Date: June 12, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 1 GUI class. 
+ * Purpose: Project 2 GUI class. 
  */
 
 import java.awt.*;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class GameGUI extends JFrame {
-	// serial version: 123L
-	private static final long serialVersuionUID = 123L;
-	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	// cave to create when reading file
 	private Cave cave;
 	
@@ -28,12 +31,17 @@ public class GameGUI extends JFrame {
 	private final JButton readBtn = new JButton("Read");
 	private final JButton searchBtn = new JButton("Search");
 	private final JButton dispBtn = new JButton("Display");
+	private final JButton sortBtn = new JButton("Sort");
 	
 	// file chooser to pick data file
 	private final JFileChooser chooseFile = new JFileChooser(".");
 	
-	// combo box and radio buttons group for search criteria
-	private final JComboBox<String> combo = new JComboBox<String>();
+	// searchCombo box and radio buttons group for search criteria
+	private final JComboBox<String> searchCombo = new JComboBox<String>();
+	// element to sort: Creature or Treasure
+	private final JComboBox<String> sortElCombo = new JComboBox<String>();
+	// category to sort element by
+	private final JComboBox<String> sortCatCombo = new JComboBox<String>();
 	
 	// tree with scroll pane
 	private JTree tree;
@@ -51,11 +59,9 @@ public class GameGUI extends JFrame {
 		// location to appear by platform
 		setLocationByPlatform(true);
 		// minimum size
-		setMinimumSize(new Dimension(600, 500));
+		setMinimumSize(new Dimension(850, 300));
 		// exit when close button pressed
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		// make visible
-		setVisible(true);
 		
 		// setup for action listeners
 		actnListeners();
@@ -66,7 +72,11 @@ public class GameGUI extends JFrame {
 		// main output, tree and data text
 		splitPaneSetup();
 		
-		setSize(new Dimension(800, 500));
+		// validate and set frame size
+		validate();
+		setSize(new Dimension(900, 900));
+		// make visible
+		setVisible(true);
 	} // end default constructor
 	
 	// adds tree and data to a split pane and adds to center of frame
@@ -99,18 +109,27 @@ public class GameGUI extends JFrame {
 		return panel;
 	} // end jtaSetup method
 	
-	// adds btns to a panel
-	private JPanel btnsSetup() {
-		// panel to add components, return at end
+	// setup for entire top panel
+	private void topPanelSetup() {
+		// panel to add items, return at end
 		JPanel panel = new JPanel(new GridBagLayout());
 		// constraints for adding components to the panel
 		GridBagConstraints c = new GridBagConstraints();
+
+		// sort labels
+		final JLabel sortLabel = new JLabel("Sort: ");
+
+		// search label
+		final JLabel searchLabel = new JLabel("Search Target: ");
+
+		// read, display labels
+		final JLabel read = new JLabel("Choose data file: ");
+		final JLabel disp = new JLabel("Display entire cave: ");
 		
-		JLabel read = new JLabel("Choose data file: ");
-		JLabel disp = new JLabel("Display entire cave: ");
-		
+		// read, display row
 		// constraints
 		c.weightx = 1.0;
+		c.weighty = 1.0;
 		
 		// read and display buttons
 		c.fill = GridBagConstraints.BOTH;
@@ -128,52 +147,68 @@ public class GameGUI extends JFrame {
 		c.gridx = 2;
 		panel.add(disp, c);
 		
-		// return the panel with read and display buttons
-		return panel;
-	} // end btnsSetup method
-	
-	// sets up the search panel with label, text field, and combo box
-	private JPanel searchBarSetup() {
-		// panel to add items, return at end
-		JPanel panel = new JPanel(new GridBagLayout());
-		// constraints for adding components to the panel
-		GridBagConstraints c = new GridBagConstraints();
-		
-		// search label
-		final JLabel searchLabel = new JLabel("Search Target: ");
-		
+		// search row
 		// add name and index buttons to group
-		combo.addItem("Index");
-		combo.addItem("Name");
-		combo.addItem("Type");
-		
-		// constraints
+		searchCombo.addItem("Index");
+		searchCombo.addItem("Name");
+		searchCombo.addItem("Type");
+				
+		// search row constraints
 		c.fill = GridBagConstraints.VERTICAL;
 		c.weighty = 1.0;
 		c.weightx = 1.0;
-		c.gridy = 0;
-		
+		c.gridy = 1;
+
 		// add search label first
 		c.anchor = GridBagConstraints.BASELINE_TRAILING;
 		c.gridx = 0;
 		panel.add(searchLabel, c);
-		
+
+		// text field
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor = GridBagConstraints.BASELINE_LEADING;
 		// text field for searching in middle
 		c.gridx = 1;
 		panel.add(txtFld, c);
-		
+
+		// search searchCombo box
 		c.gridx = 2;
-		panel.add(combo, c);
-		
+		panel.add(searchCombo, c);
+
 		// search button on furthest right
 		c.gridx = 3;
 		panel.add(searchBtn, c);
 		
-		// return the search bar panel
-		return panel;
-	} // end searchBarSetup method
+		// add name and index buttons to group
+		sortElCombo.addItem("Creature");
+		sortElCombo.addItem("Treasure");
+
+		// sort row constraints
+		c.fill = GridBagConstraints.VERTICAL;
+		c.anchor = GridBagConstraints.BASELINE_TRAILING;
+		c.weighty = 1.0;
+		c.weightx = 1.0;
+		c.gridy = 2;
+		c.gridx = 0;
+		panel.add(sortLabel, c);
+		
+		// sort element
+		c.fill = GridBagConstraints.BOTH;
+		c.anchor = GridBagConstraints.BASELINE_LEADING;
+		c.gridx = 1;
+		panel.add(sortElCombo, c);
+
+		// sortBy category
+		c.gridx = 2;
+		panel.add(sortCatCombo, c);
+
+		// sort button on furthest right
+		c.gridx = 3;
+		panel.add(sortBtn, c);
+
+		// add to main layout
+		add(panel, BorderLayout.NORTH);
+	} // end topPanelSetup method
 	
 	// returns panel with the JTree in a scrollpane
 	private JPanel treeSetup() {
@@ -193,36 +228,8 @@ public class GameGUI extends JFrame {
 		return panel;
 	} // end treeSetup method
 	
-	// adds the top panel to the frame
-	private void topPanelSetup() {
-		// top panel for components above main text area
-		JPanel panel = new JPanel(new GridBagLayout());
-		// constraints for adding components to the panel
-		GridBagConstraints c = new GridBagConstraints();
-		
-		// get the button and search panels
-		JPanel btnsPanel = btnsSetup();
-		JPanel searchPanel = searchBarSetup();
-		
-		// constraints
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1.0;
-		c.weighty = 0.5;
-		c.gridx = 0;
-
-		// btn panel on top
-		c.gridy = 0;
-		panel.add(btnsPanel, c);
-		
-		// seach panel below buttons, on top of text area
-		c.gridy = 1;
-		panel.add(searchPanel, c);
-		
-		// return panel
-		add(panel, BorderLayout.NORTH);
-	} // end topPanelSetup method
-	
 	// add action listeners to buttons
+	@SuppressWarnings("unchecked") // for sort category combo box
 	private void actnListeners() {		
 		// action listener for the read button
 		readBtn.addActionListener(e -> {
@@ -259,7 +266,35 @@ public class GameGUI extends JFrame {
 		
 		// action listener for search button
 		searchBtn.addActionListener(e -> search(
-				(String) combo.getSelectedItem(), txtFld.getText()));
+				(String) searchCombo.getSelectedItem(), txtFld.getText()));
+		
+		// action listener for sort button
+		sortBtn.addActionListener(e -> sort(sortCatCombo.getSelectedItem()));
+		
+		// item listener for sort element combo box
+		sortElCombo.addItemListener(e -> {
+			// get sort by element (Creature or Treasure)
+			String selected = (String) sortElCombo.getSelectedItem();
+			@SuppressWarnings("rawtypes") // type will be chosen based on sort
+			DefaultComboBoxModel model;
+			
+			// sort categories based on element selected
+			if(selected.equals("Treasure")) {
+				// array of sortby categories for treasure
+				Treasure.SORTBY[] cat = Treasure.SORTBY.values();
+				// create a new model of treasure sort categories
+				model = new DefaultComboBoxModel<Treasure.SORTBY>(cat);
+				// set model
+				sortCatCombo.setModel(model);
+			} else {
+				// array of sortby categories for creature
+				Creature.SORTBY[] cat = Creature.SORTBY.values();
+				// new model with creature sort categories
+				model = new DefaultComboBoxModel<Creature.SORTBY>(cat);
+				// set model
+				sortCatCombo.setModel(model);
+			} // end if else
+		}); // end lambda expression, add ItemListener
 	} // end actnListeners method
 	
 	// action for readBtn
@@ -280,11 +315,10 @@ public class GameGUI extends JFrame {
 	private void search(String type, String target) {
 		if(cave != null) {
 			// title and message
-			String title = "Search Error";
+			String title = "Search failed.";
 			String msg = "Please try again.";
 			
-			// search for target element
-			CaveElement e = null;
+			// array list for search results
 			ArrayList<CaveElement> al = null;
 			
 			// switch on type to get right search category
@@ -294,29 +328,26 @@ public class GameGUI extends JFrame {
 						// try to convert input to an int
 						int ind = Integer.parseInt(target);
 						// search for the index
-						e = cave.elByIndex.get(ind);
+						al = cave.searchByIndex(ind);
 					} catch(NumberFormatException ex) {
 						// error message reading input as an int
-						title += ": Index Input Read Error";
+						title += "\nIndex Input Read Error";
 					} // end try catch
 					break;
 				case "Name":
 					// search for element by name
-					e = cave.elByName.get(target);
+					al = cave.searchByName(target);
 					break;
 				case "Type":
 					// search for element by type
-					al = cave.elByType.get(target);
+					al = cave.searchByType(target);
 					break;
 				default:
 					break;
 			} // end switch on type
 			
-			// if the element is found and is of the right class
-			if(e != null) {
-				title = target + " was found ";
-				msg = e.toString();
-			} else if(al != null) {
+			// set title and message based on search results
+			if(al != null && !al.isEmpty()) {
 				title = target + " was found ";
 				msg = ""; // reset message to get rid of error message
 				
@@ -326,16 +357,46 @@ public class GameGUI extends JFrame {
 				} // end for each cave element in the array list
 			} else {
 				// couldn't find
-				title = target + " " + type + " couldn't be found ";
+				title += "\n" + type + ": " + target + " - couldn't be found ";
 			} // end if, else on e being null && the right type
 			
-			// set display text to 
+			// set display text to the title and msg strings
 			jta.setText(title + "\n\n" + msg);
 		} else {
 			// error message if cave is null
 			jta.setText("Search Error: Empty Cave");
 		} // end if else on cave being null
 	} // end search method
+	
+	// sorts creatures or treasures by specified category from combo box
+	private void sort(Object obj) {
+		// sort each creature list or each treasure list for each creature
+		for(Party p : cave.parties) {
+			// check if obj is a creature or treasure sortby category
+			if(obj instanceof Creature.SORTBY) {
+				// set sortby category of Creature class
+				Creature.sortBy = (Creature.SORTBY) obj; 
+				// sort creatures of party p
+				Collections.sort(p.creatures);	
+			} else {
+				// sort each treasure list for each creature
+				for(Creature c : p.creatures) {
+					// set sortby category of Treasure class
+					Treasure.sortBy = (Treasure.SORTBY) obj;
+					// sort treasures of creature c
+					Collections.sort(c.treasures);
+				} // end for each creature
+			} // end if else on obj class type
+		} // end for each party
+		
+		// create new tree
+		tree = new JTree(createNodes("Cave: \"" + 
+				chooseFile.getSelectedFile().getName() + "\""));
+		// redisplay main area: tree and output text
+		remove(splitPane);
+		splitPaneSetup();
+		validate();
+	} // end sort method
 	
 	// create nodes for multi tree data structure
 	private DefaultMutableTreeNode createNodes(String title) {

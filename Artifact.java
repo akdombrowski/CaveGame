@@ -1,17 +1,18 @@
 /*
  * Filename: Artifact.java
- * Date: May 29, 2016
+ * Date: June 12, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 1 Artifacts class. 
+ * Purpose: Project 2 Artifacts class. 
  */
 
 import java.util.Scanner;
 
 public class Artifact extends CaveElement {
 	// inherits index, name
+	// name is optional
 	protected Creature owner;
 	protected int ownerIndex;
-	public String type;
+	protected String type;
 	
 	// scanner constructor
 	public Artifact(Scanner sc) {
