@@ -1,8 +1,8 @@
 /*
  * Filename: Creature.java
- * Date: June 12, 2016
+ * Date: June 26, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 2 Creature class. 
+ * Purpose: Project 3 Creature class. 
  */
 
 import java.util.ArrayList;
@@ -26,6 +26,8 @@ public class Creature extends CaveElement implements Comparable<Creature> {
 	protected double age;
 	protected double height;
 	protected double weight;
+	// working flag
+	protected boolean busyFlag;
 	
 	// sorting category variable, default to name
 	protected static SORTBY sortBy = SORTBY.NAME;
@@ -60,6 +62,9 @@ public class Creature extends CaveElement implements Comparable<Creature> {
 		    height = sc.nextDouble();
 		    weight = sc.nextDouble();
 	    } // end if scanner has a double next
+	    
+	    // start off not busy 
+	    busyFlag = false;
 	    
 	    // return the party index
 	    return partyIndex;

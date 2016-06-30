@@ -1,8 +1,8 @@
 /*
  * Filename: Party.java
- * Date: June 12, 2016
+ * Date: June 26, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 2 Party class. 
+ * Purpose: Project 3 Party class. 
  */
 
 import java.util.ArrayList;

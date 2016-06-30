@@ -1,8 +1,8 @@
 /*
  * Filename: Treasure.java
- * Date: June 12, 2016
+ * Date: June 26, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 2 Treasures class. 
+ * Purpose: Project 3 Treasures class. 
  */
 
 import java.util.Scanner;

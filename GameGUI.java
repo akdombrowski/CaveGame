@@ -1,8 +1,8 @@
 /*
  * Filename: GameGUI.java
- * Date: June 12, 2016
+ * Date: June 26, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 2 GUI class. 
+ * Purpose: Project 3 GUI class for the Cave game. 
  */
 
 import java.awt.*;
@@ -15,9 +15,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class GameGUI extends JFrame {
-	/**
-	 * 
-	 */
+	// serial version
 	private static final long serialVersionUID = 1L;
 
 	// cave to create when reading file
@@ -32,6 +30,7 @@ public class GameGUI extends JFrame {
 	private final JButton searchBtn = new JButton("Search");
 	private final JButton dispBtn = new JButton("Display");
 	private final JButton sortBtn = new JButton("Sort");
+	private final JButton dispJobs = new JButton("Show Jobs");
 	
 	// file chooser to pick data file
 	private final JFileChooser chooseFile = new JFileChooser(".");
@@ -46,6 +45,9 @@ public class GameGUI extends JFrame {
 	// tree with scroll pane
 	private JTree tree;
 	private JScrollPane treeScroll;
+	
+	// scroll pane for jobs panel
+	private JScrollPane jobScroll;
 	
 	// split pane to hold tree and data output
 	private JSplitPane splitPane;
@@ -62,6 +64,8 @@ public class GameGUI extends JFrame {
 		setMinimumSize(new Dimension(850, 300));
 		// exit when close button pressed
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		// set cursor to default
+		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		
 		// setup for action listeners
 		actnListeners();
@@ -205,6 +209,11 @@ public class GameGUI extends JFrame {
 		// sort button on furthest right
 		c.gridx = 3;
 		panel.add(sortBtn, c);
+		
+		c.gridy = 3;
+		c.gridx = 0;
+		c.gridwidth = 4;
+		panel.add(dispJobs, c);
 
 		// add to main layout
 		add(panel, BorderLayout.NORTH);
@@ -294,7 +303,12 @@ public class GameGUI extends JFrame {
 				// set model
 				sortCatCombo.setModel(model);
 			} // end if else
-		}); // end lambda expression, add ItemListener
+		}); // end lambda expression, add ItemListener to sortElCombo
+		
+		// action listener for display jobs button
+		dispJobs.addActionListener(e -> {
+			jobFrame();
+		}); // end lambda expression, addAction listener to dispJobs
 	} // end actnListeners method
 	
 	// action for readBtn
@@ -308,6 +322,8 @@ public class GameGUI extends JFrame {
 			jta.setText("Empty Cave");
 		} else {
 			jta.setText("" + cave);
+			
+			jobFrame();
 		} // end if else
 	} // end displayCave method
 	
@@ -406,6 +422,8 @@ public class GameGUI extends JFrame {
 		DefaultMutableTreeNode partyNode;
 		// creature node
 		DefaultMutableTreeNode creatureNode;
+		// job node
+		DefaultMutableTreeNode jobNode;
 		
 		// create nodes for each party and add creatures with treasures, artifacts
 		for(Party p : cave.parties) {
@@ -436,6 +454,49 @@ public class GameGUI extends JFrame {
 		// return root node
 		return top;
 	} // end createNodes method
+	
+	// creates panel with jobs
+	private void jobsPanel() {
+		// new grid layout with nonzero vertical gaps
+		GridLayout gl = new GridLayout(0, 1);
+		gl.setVgap(10);
+		
+		// new gridlayout panel and scroll pane
+		JPanel panel = new JPanel(gl);
+		jobScroll = new JScrollPane(panel);
+		
+		// check if cave is null
+		if(cave != null) {
+			// add each job to the panel
+			for(Job j : cave.jobs) {
+				if(j == null) {
+					System.out.println("null job");
+				}
+				panel.add(j.getPanel());
+			} // end for each job in jobs list
+		} // end if cave isn't null
+	} // end jobsPanel
+	
+	private void jobFrame() {
+		JFrame frame = new JFrame("Jobs");
+		// use border layout
+		frame.setLayout(new BorderLayout());
+		// location to appear by platform
+		frame.setLocationByPlatform(true);
+		// exit when close button pressed
+		frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		// set cursor to default
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		
+		// setup jobsPanel
+		jobsPanel();
+		// add job scroll pane
+		frame.add(jobScroll, BorderLayout.CENTER);
+		// get preffered size and validate
+		frame.pack();
+		// make visible
+		frame.setVisible(true);
+	} // end jobFrame method
 	
 	// main
 	public static void main(String[] args) {

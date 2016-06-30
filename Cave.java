@@ -1,8 +1,8 @@
 /*
  * Filename: Cave.java
- * Date: June 12, 2016
+ * Date: June 26, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 2 Cave class. 
+ * Purpose: Project 3 Cave class. 
  */
 
 import java.util.ArrayList;
@@ -12,6 +12,8 @@ import java.util.Scanner;
 public class Cave {
 	// list of parties in this cave
 	protected ArrayList<Party> parties = new ArrayList<Party>();
+	// list of jobs
+	protected ArrayList<Job> jobs = new ArrayList<Job>();
 	// cave elements not owned or aligned to a party
 	protected ArrayList<Creature> unalignedC = new ArrayList<Creature>();
 	protected ArrayList<Treasure> unheldT = new ArrayList<Treasure>();
@@ -44,25 +46,28 @@ public class Cave {
 			// compress white space also, else nextInt fails
 			line = new Scanner(inline).useDelimiter ("\\s*:\\s*"); 
 
-			// switch on beginning character too add right element
+			// switch on beginning character to add right element
 			switch (inline.charAt(0)) {
 				// party
 				case 'p': 
 					addParty(line, elements); 
 					break;
-					// creature
+				// creature
 				case 'c': 
 					addCreature(line, elements); 
 					break;
-					// treasure
+				// treasure
 				case 't': 
 					addTreasure(line, elements); 
 					break;
-					// artifact
+				// artifact
 				case 'a': 
 					addArtifact(line, elements); 
 					break;
-					// anything else
+				// job
+				case 'j':
+					addJob(line, elements);
+				// anything else
 				default:
 					break;
 			} // end switch
@@ -148,6 +153,18 @@ public class Cave {
 		// add artifact to elements map
 		el.put(a.index, a);
 	} // end method addArtifact
+	
+	// create new job
+	public void addJob(Scanner sc, HashMap<Integer, CaveElement> el) {
+		// create new job
+		Job j = new Job(sc, el);
+		
+		// start a new job thread
+		(new Thread(j)).start();
+		
+		// add job to jobs list
+		jobs.add(j);
+	} // end addJob method
 	
 	// search through parties by index, if doesn't match a party, 
 	// call each party's search method

@@ -1,8 +1,8 @@
 /*
  * Filename: Artifact.java
- * Date: June 12, 2016
+ * Date: June 26, 2016
  * Author: Anthony Dombrowski
- * Purpose: Project 2 Artifacts class. 
+ * Purpose: Project 3 Artifacts class. 
  */
 
 import java.util.Scanner;
